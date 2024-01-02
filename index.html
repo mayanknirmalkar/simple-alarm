@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Clock</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: -webkit-linear-gradient(rgb(251, 251, 252), rgb(209, 132, 250));
+        }
+
+        #clock {
+            font-size: 2rem;
+            margin-bottom: 20px;
+
+        }
+
+        p {
+            font-size: 72px;
+            background: -webkit-linear-gradient(blueviolet, black);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        label {
+            font-size: 20px;
+            background: -webkit-linear-gradient(blueviolet, black);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #alarmForm {
+            display: flex;
+            align-items: center;
+        }
+
+        #list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .alarm-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            background-color: #fff;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <p id="clock"></p>
+
+        <form id="alarmForm">
+            <label for="timeInput">Set Alarm:</label>
+            <input type="time" id="timeInput" required style="margin-left: 1rem;">
+            <button type="button" onclick="getTime()" style="padding: 10px; border-radius: 10px; color: white;  background: -webkit-linear-gradient(blueviolet, black);">Set Alarm</button>
+        </form>
+
+        <ul id="list"></ul>
+    </div>
+
+    <script>
+        //====================================LIVE CLOCK ==========================//
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('clock').textContent = timeString;
+        }
+
+        // Update the clock every second
+        setInterval(updateClock, 1000);
+
+        // Initial call to display the clock immediately
+        updateClock();
+
+        //======================================ALARM LOGIC===============================//
+        let alarmList = [];
+
+        const getTime = () => {
+            let time = document.getElementById("timeInput").value;
+            if (!time) {
+                alert("Please select the time");
+                return;
+            }
+            time = time.split(":");
+            const hours = parseInt(time[0]);
+            const minutes = parseInt(time[1]);
+            openAlarm(hours, minutes);
+        };
+
+        const openAlarm = (hours, minutes) => {
+            const listContent = document.createElement("div");
+
+            listContent.style.backgroundColor = "blueviolet";
+            listContent.style.color = "white";
+            listContent.style.borderRadius = "10px";
+            listContent.style.padding = "1rem";
+            listContent.style.display = "flex";
+            listContent.style.alignItems = "center"
+            listContent.style.justifyContent = "space-between";
+
+            const listContentChild1 = document.createElement("div");
+
+            listContentChild1.innerHTML = hours.toString().padStart(2, "0") + " : " + minutes.toString().padStart(2, "0");
+
+            const listContentChild2 = document.createElement("div");
+            listContentChild2.style.marginLeft = "5rem";
+
+            const deleteButton = document.createElement("button");
+            deleteButton.style.background =  "-webkit-linear-gradient(blueviolet, black)";
+            deleteButton.style.color = "white";
+            deleteButton.style.padding = "5px";
+            deleteButton.style.borderRadius = "5px";
+
+            deleteButton.setAttribute("onclick", "closeAlarm(this)");
+
+            deleteButton.innerHTML = "Delete";
+
+            listContentChild2.appendChild(deleteButton);
+
+            listContent.appendChild(listContentChild1);
+            listContent.appendChild(listContentChild2);
+
+            const listElement = document.createElement("li");
+            listElement.className = "alarm-item";
+            listElement.id = alarmList.length;
+            listElement.style.background = "transparent";
+
+
+            listElement.appendChild(listContent);
+
+            document.getElementById('list').appendChild(listElement);
+
+            clearInputs();
+
+            alarmList.push({
+                hours,
+                minutes,
+                key:alarmList.length
+            });
+        };
+
+        const closeAlarm = (button) => {
+            const listItem = button.closest('.alarm-item');
+            const key = listItem.getAttribute("id");
+            listItem.remove();
+
+          
+
+            // Remove the alarm from the array based on the key
+            alarmList = alarmList.filter(alarm => alarm.key !== parseInt(key));
+
+        };
+
+        const clearInputs = () => {
+            document.getElementById("timeInput").value = "00:00";
+        };
+
+
+        const checkAlarm = () =>{
+
+            alarmList.forEach((alarm) => {
+                const h = parseInt(alarm.hours)
+                const m = parseInt(alarm.minutes)
+                const key = parseInt(alarm.key)
+    
+                const now = new Date();
+                if( now.getHours() === h ){
+                        if( now.getMinutes() === m ){
+                             // Remove the alarm from the DOM
+                            document.getElementById(alarm.key).remove()
+                             // Remove the alarm from the array based on the key
+                            alarmList = alarmList.filter(alarm => alarm.key !== parseInt(key));
+                            alert("The alarm is over")
+                        }
+                }
+            })
+        }
+
+        setInterval(checkAlarm, 1000);
+
+    </script>
+</body>
+</html>
